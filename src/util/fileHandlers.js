@@ -3,7 +3,7 @@ const fastCsv = require("fast-csv");
 const dnsPromises = require("dns");
 
 //new fast csv reader
-const fastCsvFileToArray = async (file, server = false) => {
+const fastCsvFileToArray = async (file) => {
   const options = {
     objectMode: true,
     delimiter: ",",
@@ -65,47 +65,15 @@ const fastCsvFileToArray = async (file, server = false) => {
         resolve(data);
       });
   });
-  if (!server) {
-    fs.unlink(file.path, (err) => {
-      console.log(err);
-    });
-  }
   return results;
 };
 
-//faster all file reader
-const FastReadAllFiles = async (AllFiles) => {
-  const results = await Promise.all(
-    AllFiles.map(async (file) => {
-      const fileContents = await fastCsvFileToArray(file);
-      fs.unlink(file.path, (err) => {
-        console.log(err);
-      });
-      return fileContents;
-    })
-  );
-
-  return results;
-};
-
-//check ip host
-const checkIp = async (ip) => {
-  return await new Promise((resolve, reject) => {
-    dnsPromises.reverse(ip, (err, domains) => {
-      if (err) {
-        return resolve("");
-      }
-      const hostname = domains[0];
-      return resolve(hostname);
-    });
-  });
-};
-
+//fetch all files available file from dir / is senderList available read corosponding intf and send data
 const fetchDir = async (path, sender = null) => {
   let fileList;
   if (sender) {
     const fileArr = await readFolder(path, "intf");
-    fileList = fileArr.filter((file) => sender === file.sender);
+    fileList = fileArr.filter((file) => sender.includes(file.sender));
   } else if (path.includes("sflow")) {
     return await readFolder(path, "sflow");
   } else if (path.includes("netflow")) {
@@ -123,7 +91,6 @@ const fetchDir = async (path, sender = null) => {
   const results = await Promise.all(
     fileList.map(async (file) => {
       const content = await readFile(file, options);
-      console.log(content);
       return content;
     })
   );
@@ -133,6 +100,7 @@ const fetchDir = async (path, sender = null) => {
   return obj;
 };
 
+//read all files from folder and filter
 const readFolder = (folderPath, filter) => {
   return new Promise((resolve, reject) => {
     fs.readdir(folderPath, (err, files) => {
@@ -159,6 +127,7 @@ const readFolder = (folderPath, filter) => {
   });
 };
 
+//read file and send file obj
 const readFile = async (file, options) => {
   let data = [];
   let obj = {};
@@ -172,29 +141,43 @@ const readFile = async (file, options) => {
         data.push(row);
       })
       .on("end", (rowCount) => {
-        obj[file.sender] = data;
-        obj.creationDate = file.date;
-        obj.filename = file.filename;
+        obj[file.sender] = {
+          data,
+          creationDate: file.date,
+          filename: file.filename,
+        };
         resolve(obj);
       });
   });
   return resoult;
 };
 
+//read all sended files and send back fileObj
 const readAllFileServer = async (AllFiles) => {
   const results = await Promise.all(
     AllFiles.map(async (file) => {
-      return await fastCsvFileToArray(file, true);
+      return await fastCsvFileToArray(file);
     })
   );
 
   return results;
 };
 
+//check ip host
+const checkIp = async (ip) => {
+  return await new Promise((resolve, reject) => {
+    dnsPromises.reverse(ip, (err, domains) => {
+      if (err) {
+        return resolve("");
+      }
+      const hostname = domains[0];
+      return resolve(hostname);
+    });
+  });
+};
+
 module.exports = {
   checkIp,
-  fastCsvFileToArray,
-  FastReadAllFiles,
   fetchDir,
   readAllFileServer,
 };

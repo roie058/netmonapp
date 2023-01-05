@@ -6,10 +6,16 @@ const {
   Menu,
   dialog,
   shell,
+  autoUpdater,
 } = require("electron");
 const path = require("path");
-const { electron } = require("process");
 const { server, app: express } = require("./server");
+
+if (app.isPackaged) {
+  const server = "https://hazel-sigma-seven.vercel.app";
+  const url = `${server}/update/${process.platform}/${app.getVersion()}`;
+  autoUpdater.setFeedURL({ url });
+}
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -55,7 +61,7 @@ const createTray = () => {
       click: () => {
         dialog.showMessageBox({
           type: "info",
-          title: "Net-Monitor webService V1.0.0",
+          title: "Net-Monitor webService V1.0.1",
           message: "Flow Analyzer : V1.1.8",
         });
       },

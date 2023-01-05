@@ -1,31 +1,23 @@
-const { readPortList } = require("../util/readPortList");
 const {
-  FastReadAllFiles,
-  fastCsvFileToArray,
   checkIp,
   fetchDir,
   readAllFileServer,
 } = require("../util/fileHandlers");
 
+//fetch a list of all sflow and netflow files
 const fetchData = async (req, res, next) => {
-  const avalibleFiles = await fetchDir(
-    "C:/Users/roie0/OneDrive/שולחן העבודה/netflow"
-  );
+  const avalibleNetflowFiles = await fetchDir("C:/monitorm/util/netflow/data");
+  const avalibleSflowFiles = await fetchDir("C:/monitorm/util/sflow/data");
+
+  const avalibleFiles = avalibleNetflowFiles.concat(avalibleSflowFiles);
+
   res.status(200).json({ fileList: avalibleFiles });
 };
 
-const fetchIntf = async (req, res, next) => {
-  const sender = req.params.sender;
-  const intf = await fetchDir(
-    "C:/Users/roie0/OneDrive/שולחן העבודה/netflow",
-    sender
-  );
-  res.status(200).json({ intf: intf });
-};
-
+//get file list and send array of parsed fileObj
 const analyzeDataOnServer = async (req, res, next) => {
-  const { filesList } = req.body; //filesList [fileObj..]
-  let parsedArray = await readAllFileServer(JSON.parse(filesList));
+  const { filesList } = req.body;
+  let parsedArray = await readAllFileServer(filesList);
   const reduced = parsedArray.reduce(
     (accumulator, currentValue) => [...accumulator, ...currentValue],
     []
@@ -33,39 +25,37 @@ const analyzeDataOnServer = async (req, res, next) => {
   res.status(201).json({ fileArr: reduced });
 };
 
+//get sender list read the intf and send intf data to client
 const createIntf = async (req, res, next) => {
-  let file = req.files;
-  const portList = await readPortList(file);
-  res.status(200).json({ portList: portList });
-};
-
-const analyzeData = async (req, res, next) => {
-  let file = req.files;
-  //one file handler
-  if (file.length === 1) {
-    const fileArr = await fastCsvFileToArray(file[0]);
-    res.status(200).json({ fileArr: fileArr });
-  }
-  //multiple file handler
-  if (file.length > 1) {
-    let parsedArray = await FastReadAllFiles(file);
-    const reduced = parsedArray.reduce(
-      (accumulator, currentValue) => [...accumulator, ...currentValue],
-      []
+  let { senderList } = req.body;
+  let intfsNetflow;
+  let intfsSflow;
+  if (senderList.netflow) {
+    intfsNetflow = await fetchDir(
+      "C:/monitorm/util/netflow/data",
+      senderList.netflow
     );
-    res.status(201).json({ fileArr: reduced });
   }
+  if (senderList.sflow) {
+    intfsSflow = await fetchDir(
+      "C:/monitorm/util/sflow/data",
+      senderList.sflow
+    );
+  }
+
+  const intfs = { ...intfsNetflow, ...intfsSflow };
+
+  res.status(200).json({ portList: intfs });
 };
 
+//get ip and send back hostName
 const dns = async (req, res, next) => {
   const ip = req.body.ipHost;
   const host = await checkIp(ip);
   res.status(200).json({ host: host });
 };
 
-exports.analyzeData = analyzeData;
 exports.createIntf = createIntf;
 exports.dns = dns;
-exports.fetchIntf = fetchIntf;
 exports.fetchData = fetchData;
 exports.analyzeDataOnServer = analyzeDataOnServer;

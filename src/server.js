@@ -28,8 +28,8 @@ app.use((req, res, next) => {
 
 app.use(express.static(path.join(__dirname, "react/flow-analyzer/build")));
 
-app.use("/flow-analyzer", analyzerRoutes);
-
 app.get("/", (req, res) => res.send("express"));
+
+app.use("/flow-analyzer", analyzerRoutes);
 
 module.exports = { app, server };
