@@ -73,7 +73,11 @@ const fetchDir = async (path, sender = null) => {
   let fileList;
   if (sender) {
     const fileArr = await readFolder(path, "intf");
-    fileList = fileArr.filter((file) => sender.includes(file.sender));
+    if (sender.length > 0) {
+      fileList = fileArr.filter((file) => sender.includes(file.sender));
+    } else {
+      return fileArr;
+    }
   } else if (path.includes("sflow")) {
     return await readFolder(path, "sflow");
   } else if (path.includes("netflow")) {

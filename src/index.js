@@ -61,8 +61,8 @@ const createTray = () => {
       click: () => {
         dialog.showMessageBox({
           type: "info",
-          title: "Net-Monitor webService V1.0.1",
-          message: "Flow Analyzer : V1.1.8",
+          title: "Net-Monitor webService V1.0.2",
+          message: "Flow Analyzer : V1.1.8(web)",
         });
       },
     },
@@ -95,7 +95,6 @@ const createTray = () => {
 app.on("ready", () => {
   createTray();
   server.listen(express.get("Port"), express.get("Host"));
-  shell.openExternal(`http://localhost:${express.get("Port")}/`);
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common

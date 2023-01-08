@@ -9,9 +9,10 @@ router.get("/", (req, res) => {
   );
 });
 
-router.get("/api/analyze", analyzeController.fetchData);
+router.get("/api/analyze/:isSflow", analyzeController.fetchData);
 
 router.post("/api/analyze", analyzeController.analyzeDataOnServer);
+router.get("/api/intf", analyzeController.getIntf);
 router.post("/api/intf", analyzeController.createIntf);
 
 router.post("/api/dns", analyzeController.dns);

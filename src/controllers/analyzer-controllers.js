@@ -3,14 +3,22 @@ const {
   fetchDir,
   readAllFileServer,
 } = require("../util/fileHandlers");
+const sflowPath = "C:/monitorm/util/sflow/data";
+//const sflowPath = "C:/Users/roie0/OneDrive/שולחן העבודה/sflow";
+const netflowPath = "C:/monitorm/util/netflow/data";
+//const netflowPath = "C:/Users/roie0/OneDrive/שולחן העבודה/netflow";
 
 //fetch a list of all sflow and netflow files
 const fetchData = async (req, res, next) => {
-  const avalibleNetflowFiles = await fetchDir("C:/monitorm/util/netflow/data");
-  const avalibleSflowFiles = await fetchDir("C:/monitorm/util/sflow/data");
+  const { isSflow } = req.params;
 
-  const avalibleFiles = avalibleNetflowFiles.concat(avalibleSflowFiles);
-
+  let avalibleFiles;
+  if (isSflow === "true") {
+    avalibleFiles = await fetchDir(sflowPath);
+  } else {
+    avalibleFiles = await fetchDir(netflowPath);
+  }
+  //const avalibleFiles = avalibleNetflowFiles.concat(avalibleSflowFiles);
   res.status(200).json({ fileList: avalibleFiles });
 };
 
@@ -25,22 +33,26 @@ const analyzeDataOnServer = async (req, res, next) => {
   res.status(201).json({ fileArr: reduced });
 };
 
+//get all available senders by sflow and netflow
+//get sender list read the intf and send intf data to client
+const getIntf = async (req, res, next) => {
+  const avalibleNetflowIntfs = await fetchDir(netflowPath, []);
+  const avalibleSflowIntfs = await fetchDir(sflowPath, []);
+  const intfs = { sflow: avalibleSflowIntfs, netflow: avalibleNetflowIntfs };
+
+  res.status(200).json({ portList: intfs });
+};
+
 //get sender list read the intf and send intf data to client
 const createIntf = async (req, res, next) => {
   let { senderList } = req.body;
   let intfsNetflow;
   let intfsSflow;
-  if (senderList.netflow) {
-    intfsNetflow = await fetchDir(
-      "C:/monitorm/util/netflow/data",
-      senderList.netflow
-    );
+  if (senderList.netflow.length) {
+    intfsNetflow = await fetchDir(netflowPath, senderList.netflow);
   }
-  if (senderList.sflow) {
-    intfsSflow = await fetchDir(
-      "C:/monitorm/util/sflow/data",
-      senderList.sflow
-    );
+  if (senderList.sflow.length) {
+    intfsSflow = await fetchDir(sflowPath, senderList.sflow);
   }
 
   const intfs = { ...intfsNetflow, ...intfsSflow };
@@ -58,4 +70,5 @@ const dns = async (req, res, next) => {
 exports.createIntf = createIntf;
 exports.dns = dns;
 exports.fetchData = fetchData;
+exports.getIntf = getIntf;
 exports.analyzeDataOnServer = analyzeDataOnServer;
