@@ -5,8 +5,9 @@ const app = express();
 const analyzerRoutes = require("./routes/analyzer-routes");
 const server = http.createServer(app);
 const bodyParser = require("body-parser");
-const host = "0.0.0.0";
+
 const port = 8087;
+let host = "0.0.0.0";
 
 app.use(bodyParser.json());
 
@@ -15,10 +16,6 @@ app.use(
     extended: true,
   })
 );
-
-app.set("Host", host);
-app.set("Port", port);
-
 app.use((req, res, next) => {
   res.append("Access-Control-Allow-Origin", ["*"]);
   res.append("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
@@ -27,9 +24,11 @@ app.use((req, res, next) => {
 });
 
 app.use(express.static(path.join(__dirname, "react/flow-analyzer/build")));
-
 app.get("/", (req, res) => res.send("express"));
 
 app.use("/flow-analyzer", analyzerRoutes);
+
+app.set("Host", host);
+app.set("Port", port);
 
 module.exports = { app, server };

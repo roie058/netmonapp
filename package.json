@@ -1,7 +1,7 @@
 {
   "name": "netmonitorapp",
-  "productName": "Net Monitor",
-  "version": "1.0.2",
+  "productName": "NetMonitor",
+  "version": "1.0.3",
   "description": "Net Monitor App on electron",
   "main": "src/index.js",
   "scripts": {
@@ -13,7 +13,7 @@
   },
   "keywords": [],
   "author": {
-    "name": "Net Monitor",
+    "name": "NetMonitor",
     "email": "roie058@gmail.com"
   },
   "license": "MIT",
