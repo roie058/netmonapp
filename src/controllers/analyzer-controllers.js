@@ -3,10 +3,10 @@ const {
   fetchDir,
   readAllFileServer,
 } = require("../util/fileHandlers");
-const sflowPath = "C:/monitorm/util/sflow/data";
-//const sflowPath = "C:/Users/roie0/OneDrive/שולחן העבודה/sflow";
-const netflowPath = "C:/monitorm/util/netflow/data";
-//const netflowPath = "C:/Users/roie0/OneDrive/שולחן העבודה/netflow";
+//const sflowPath = "C:/monitorm/util/sflow/data";
+const sflowPath = "C:/Users/roie0/OneDrive/שולחן העבודה/sflow";
+//const netflowPath = "C:/monitorm/util/netflow/data";
+const netflowPath = "C:/Users/roie0/OneDrive/שולחן העבודה/netflow";
 
 //fetch a list of all sflow and netflow files
 const fetchData = async (req, res, next) => {

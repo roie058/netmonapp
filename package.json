@@ -1,7 +1,7 @@
 {
   "name": "netmonitorapp",
   "productName": "NetMonitor",
-  "version": "1.0.3",
+  "version": "1.0.32",
   "description": "Net Monitor App on electron",
   "main": "src/index.js",
   "scripts": {
