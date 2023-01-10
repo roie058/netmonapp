@@ -40,7 +40,6 @@ const createTray = () => {
       click: async () => {
         //const host = await lookup(hostname(), { family: 4 });
         server.listen(express.get("Port"), express.get("Host"), () => {
-          console.log(host.address);
           menuTamplate[1].enabled = false;
           menuTamplate[2].enabled = true;
           buildTrayMenu(menuTamplate);
@@ -65,7 +64,7 @@ const createTray = () => {
         const host = await lookup(hostname(), { family: 4 });
         dialog.showMessageBox({
           type: "info",
-          title: "Net-Monitor webService V1.0.34",
+          title: "Net-Monitor webService V1.0.4",
           message: `Flow Analyzer : V1.2.1(web)\n Host:${host.address} `,
         });
       },

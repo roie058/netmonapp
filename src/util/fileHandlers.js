@@ -1,6 +1,7 @@
 const fs = require("fs");
 const fastCsv = require("fast-csv");
 const dnsPromises = require("dns");
+const { isIP } = require("net");
 
 //new fast csv reader
 const fastCsvFileToArray = async (file) => {
@@ -113,7 +114,7 @@ const readFolder = (folderPath, filter) => {
       });
       const filesArr = Promise.all(
         fileNames.map(async (name) => {
-          return await new Promise((resolve, reject) => {
+          const oneFile = await new Promise((resolve, reject) => {
             fs.stat(`${folderPath}/${name}`, "utf8", (err, data) => {
               if (err) return "";
               resolve({
@@ -124,6 +125,10 @@ const readFolder = (folderPath, filter) => {
               });
             });
           });
+          if (isIP(oneFile.sender) !== 0) {
+            oneFile.hostName = await checkIp(oneFile.sender);
+          }
+          return oneFile;
         })
       );
       resolve(filesArr);
@@ -147,6 +152,7 @@ const readFile = async (file, options) => {
       .on("end", (rowCount) => {
         obj[file.sender] = {
           data,
+          hostName: file.hostName,
           creationDate: file.date,
           filename: file.filename,
         };

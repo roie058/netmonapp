@@ -39,7 +39,6 @@ const getIntf = async (req, res, next) => {
   const avalibleNetflowIntfs = await fetchDir(netflowPath, []);
   const avalibleSflowIntfs = await fetchDir(sflowPath, []);
   const intfs = { sflow: avalibleSflowIntfs, netflow: avalibleNetflowIntfs };
-
   res.status(200).json({ portList: intfs });
 };
 
