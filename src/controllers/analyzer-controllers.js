@@ -2,11 +2,13 @@ const {
   checkIp,
   fetchDir,
   readAllFileServer,
+  readSendersNames,
 } = require("../util/fileHandlers");
+
+//paths
 const sflowPath = "C:/monitorm/util/sflow/data";
-//const sflowPath = "C:/Users/roie0/OneDrive/שולחן העבודה/sflow";
 const netflowPath = "C:/monitorm/util/netflow/data";
-//const netflowPath = "C:/Users/roie0/OneDrive/שולחן העבודה/netflow";
+const senderDetailPath = "c:/monitorm/status/systemdev.csv";
 
 //fetch a list of all sflow and netflow files
 const fetchData = async (req, res, next) => {
@@ -38,7 +40,33 @@ const analyzeDataOnServer = async (req, res, next) => {
 const getIntf = async (req, res, next) => {
   const avalibleNetflowIntfs = await fetchDir(netflowPath, []);
   const avalibleSflowIntfs = await fetchDir(sflowPath, []);
-  const intfs = { sflow: avalibleSflowIntfs, netflow: avalibleNetflowIntfs };
+
+  const avalibleNetflowIntfHost = await Promise.all(
+    avalibleNetflowIntfs.map(async (intf) => {
+      const hostNameObj = await readSendersNames(senderDetailPath, intf.sender);
+      return {
+        ...intf,
+        senderName: hostNameObj.senderName,
+        description: hostNameObj.description,
+      };
+    })
+  );
+
+  const avalibleSflowIntfHost = await Promise.all(
+    avalibleSflowIntfs.map(async (intf) => {
+      const hostNameObj = await readSendersNames(senderDetailPath, intf.sender);
+      return {
+        ...intf,
+        senderName: hostNameObj.senderName,
+        description: hostNameObj.description,
+      };
+    })
+  );
+
+  const intfs = {
+    sflow: avalibleSflowIntfHost,
+    netflow: avalibleNetflowIntfHost,
+  };
   res.status(200).json({ portList: intfs });
 };
 
@@ -49,13 +77,44 @@ const createIntf = async (req, res, next) => {
   let intfsSflow;
   if (senderList.netflow.length) {
     intfsNetflow = await fetchDir(netflowPath, senderList.netflow);
+    const sendersArr = Object.keys(intfsNetflow);
+    const avalibleSflowIntfHost = await Promise.all(
+      sendersArr.map(async (intf) => {
+        const hostNameObj = await readSendersNames(senderDetailPath, intf);
+        return {
+          [intf]: {
+            ...intfsNetflow[intf],
+            senderName: hostNameObj.senderName,
+            description: hostNameObj.description,
+          },
+        };
+      })
+    );
+    intfsNetflow = avalibleSflowIntfHost.reduce((acc, cur) => {
+      return { ...acc, ...cur };
+    }, {});
   }
   if (senderList.sflow.length) {
     intfsSflow = await fetchDir(sflowPath, senderList.sflow);
+    const sendersArr = Object.keys(intfsSflow);
+    const avalibleSflowIntfHost = await Promise.all(
+      sendersArr.map(async (intf) => {
+        const hostNameObj = await readSendersNames(senderDetailPath, intf);
+        return {
+          [intf]: {
+            ...intfsSflow[intf],
+            senderName: hostNameObj.senderName ?? " ",
+            description: hostNameObj.description ?? " ",
+          },
+        };
+      })
+    );
+    intfsSflow = avalibleSflowIntfHost.reduce((acc, cur) => {
+      return { ...acc, ...cur };
+    }, {});
   }
 
   const intfs = { ...intfsNetflow, ...intfsSflow };
-
   res.status(200).json({ portList: intfs });
 };
 

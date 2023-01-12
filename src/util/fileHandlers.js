@@ -69,6 +69,47 @@ const fastCsvFileToArray = async (file) => {
   return results;
 };
 
+const readSendersNames = async (path, sender) => {
+  const options = {
+    objectMode: true,
+    delimiter: ",",
+    quote: null,
+    headers: [
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      "ipSender",
+      "senderName",
+      "description",
+      undefined,
+      undefined,
+      undefined,
+    ],
+    ignoreEmpty: true,
+    strictColumnHandling: true,
+  };
+
+  let data = [];
+  if (!path) {
+    return;
+  }
+  const results = await new Promise((resolve, reject) => {
+    fs.createReadStream(path)
+      .pipe(fastCsv.parse(options).validate((data) => data.ipSender === sender))
+      .on("error", (error) => {
+        reject(error);
+      })
+      .on("data", async (row) => {
+        resolve(row);
+      })
+      .on("end", (rowCount) => {
+        resolve(data);
+      });
+  });
+  return results;
+};
+
 //fetch all files available file from dir / is senderList available read corosponding intf and send data
 const fetchDir = async (path, sender = null) => {
   let fileList;
@@ -114,7 +155,7 @@ const readFolder = (folderPath, filter) => {
       });
       const filesArr = Promise.all(
         fileNames.map(async (name) => {
-          const oneFile = await new Promise((resolve, reject) => {
+          return await new Promise((resolve, reject) => {
             fs.stat(`${folderPath}/${name}`, "utf8", (err, data) => {
               if (err) return "";
               resolve({
@@ -125,10 +166,6 @@ const readFolder = (folderPath, filter) => {
               });
             });
           });
-          if (isIP(oneFile.sender) !== 0) {
-            oneFile.hostName = await checkIp(oneFile.sender);
-          }
-          return oneFile;
         })
       );
       resolve(filesArr);
@@ -152,7 +189,6 @@ const readFile = async (file, options) => {
       .on("end", (rowCount) => {
         obj[file.sender] = {
           data,
-          hostName: file.hostName,
           creationDate: file.date,
           filename: file.filename,
         };
@@ -190,4 +226,5 @@ module.exports = {
   checkIp,
   fetchDir,
   readAllFileServer,
+  readSendersNames,
 };
