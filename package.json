@@ -1,0 +1,41 @@
+{
+  "name": "netmonitorapp",
+  "productName": "NetMonitor",
+  "version": "1.0.6",
+  "description": "Net Monitor App on electron",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "author": "NetMonitor",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^22.0.3",
+    "electron-builder": "^22.10.3"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.1",
+    "express": "^4.18.2",
+    "fast-csv": "^4.3.6"
+  },
+  "build":{
+"appId":"net.netmonitor.netmonitorapp",
+"productName": "NetMonitor",
+"win": {
+  "target": [
+    "nsis"
+  ]
+},
+"directories": {
+  "buildResources": "assets"
+},
+"extraResources": [
+  "./assets/**"
+],  "nsis": {
+  "allowToChangeInstallationDirectory": true,
+  "oneClick": false
+}
+  }
+}
