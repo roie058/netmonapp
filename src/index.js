@@ -60,7 +60,7 @@ const createTray = () => {
         dialog.showMessageBox({
           type: "info",
           title: "Net-Monitor webService V1.0.6",
-          message: `Flow Analyzer : V1.2.3(web)\n Host:${host.address} `,
+          message: `Flow Analyzer : V1.2.31(web)\n Host:${host.address} `,
         });
       },
     },
