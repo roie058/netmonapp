@@ -59,7 +59,7 @@ const createTray = () => {
         const host = await lookup(hostname(), { family: 4 });
         dialog.showMessageBox({
           type: "info",
-          title: "Net-Monitor webService V1.0.71",
+          title: "Net-Monitor webService V1.0.8",
           message: `Flow Analyzer : V1.2.43(web)\n Host:${host.address} `,
         });
       },
