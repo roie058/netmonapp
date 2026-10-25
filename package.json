@@ -1,13 +1,16 @@
 {
   "name": "netmonitorapp",
   "productName": "NetMonitor",
-  "version": "1.0.81",
+  "version": "1.0.82",
   "description": "Net Monitor App on electron",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --test",
     "start": "electron .",
     "dist": "electron-builder"
+  },
+  "engines": {
+    "node": ">=24.22.1"
   },
   "author": "NetMonitor",
   "license": "MIT",
